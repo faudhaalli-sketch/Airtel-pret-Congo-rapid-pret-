@@ -1,0 +1,9 @@
+{
+  "name": "airtel-money-pret-congo",
+  "version": "1.0.0",
+  "description": "Airtel Money Pret Congo - Loan site with Telegram approval",
+  "type": "module",
+  "dependencies": {
+    "@vercel/kv": "^1.0.1"
+  }
+}
